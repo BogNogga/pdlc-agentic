@@ -140,7 +140,7 @@ const AnimatedWorkflowProgress: React.FC<AnimatedWorkflowProgressProps> = ({
       estimatedTime: '30-60 seconds',
       subtasks: [
         'Preparing organizational signals for AI analysis',
-        'Sending signals to OpenAI GPT-3.5-Turbo model',
+        'Sending signals to DeepSeek V4.1 Flash via OpenRouter',
         'AI analyzing operational patterns and themes',
         'Generating 8-12 strategic opportunities',
         'Validating opportunity-signal relationships',

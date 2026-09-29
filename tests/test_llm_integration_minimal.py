@@ -1,6 +1,6 @@
 """
 Minimal LLM integration test with real API calls.
-Uses the cheapest model and minimal data to verify functionality.
+Uses minimal data to keep OpenRouter costs low.
 """
 
 import pytest
@@ -11,7 +11,9 @@ from dotenv import load_dotenv
 # Load environment variables for testing
 load_dotenv()
 
-from backend.services.lcel_service import lcel_service
+from backend.services.lcel_service import lcel_service, DEFAULT_MODEL
+
+EXPECTED_MODEL = os.getenv("OPENROUTER_MODEL") or DEFAULT_MODEL
 from backend.models import Signal, Opportunity
 
 
@@ -38,22 +40,22 @@ class TestLLMIntegrationMinimal:
             )
         ]
     
-    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not available")
+    @pytest.mark.skipif(not os.getenv("OPENROUTER_API_KEY"), reason="OpenRouter API key not available")
     @pytest.mark.asyncio
     async def test_llm_availability(self):
         """Test that LLM service is available and configured correctly."""
         llm = lcel_service.get_llm()
         
         assert llm is not None, "LLM should be available when API key is set"
-        assert llm.model_name == "gpt-3.5-turbo", "Should be using the cheaper gpt-3.5-turbo model"
+        assert llm.model_name == EXPECTED_MODEL, f"Should be using {EXPECTED_MODEL}"
         assert llm.temperature == 0.7, "Temperature should be set correctly"
     
-    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not available")
+    @pytest.mark.skipif(not os.getenv("OPENROUTER_API_KEY"), reason="OpenRouter API key not available")
     @pytest.mark.asyncio
     async def test_generate_opportunities_minimal(self, minimal_signals):
         """Test opportunity generation with minimal signals to reduce API costs."""
         print(f"\n🧪 Testing LLM integration with {len(minimal_signals)} signals...")
-        print("💰 Using gpt-3.5-turbo to minimize costs")
+        print(f"💰 Using {EXPECTED_MODEL} via OpenRouter")
         
         try:
             # Generate opportunities
@@ -91,7 +93,7 @@ class TestLLMIntegrationMinimal:
             print(f"❌ LLM integration test failed: {str(e)}")
             raise
     
-    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not available")
+    @pytest.mark.skipif(not os.getenv("OPENROUTER_API_KEY"), reason="OpenRouter API key not available")
     @pytest.mark.asyncio
     async def test_assess_opportunity_minimal(self, minimal_signals):
         """Test opportunity assessment with minimal data."""
@@ -132,7 +134,7 @@ class TestLLMIntegrationMinimal:
             print(f"❌ Assessment test failed: {str(e)}")
             raise
     
-    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not available")
+    @pytest.mark.skipif(not os.getenv("OPENROUTER_API_KEY"), reason="OpenRouter API key not available")
     @pytest.mark.asyncio
     async def test_generate_portfolio_minimal(self):
         """Test portfolio generation with minimal data."""
@@ -163,7 +165,7 @@ class TestLLMIntegrationMinimal:
             print(f"❌ Portfolio generation test failed: {str(e)}")
             raise
     
-    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not available")
+    @pytest.mark.skipif(not os.getenv("OPENROUTER_API_KEY"), reason="OpenRouter API key not available")
     @pytest.mark.asyncio
     async def test_json_parsing_robustness(self, minimal_signals):
         """Test that JSON parsing handles LLM output correctly."""
@@ -189,11 +191,11 @@ class TestLLMIntegrationMinimal:
             raise
     
     def test_model_configuration(self):
-        """Test that the model is configured to use the cheaper option."""
+        """Test that the configured OpenRouter model is used."""
         llm = lcel_service.get_llm()
         
         if llm:  # Only test if API key is available
-            assert llm.model_name == "gpt-3.5-turbo", "Should be using gpt-3.5-turbo for cost efficiency"
-            print("✅ Using cost-efficient gpt-3.5-turbo model")
+            assert llm.model_name == EXPECTED_MODEL, f"Should be using {EXPECTED_MODEL}"
+            print(f"✅ Using {EXPECTED_MODEL}")
         else:
             print("⚠️ LLM not available (no API key) - skipping model configuration test")

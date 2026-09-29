@@ -3,6 +3,7 @@ API routes for the Signal-to-Opportunity Analysis system.
 Contains all FastAPI endpoint definitions.
 """
 
+import asyncio
 import logging
 from typing import List
 from datetime import datetime
@@ -159,7 +160,7 @@ async def generate_opportunities(session_id: str):
         if "LLM service not available" in str(e):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="LLM service not available. Please set OPENAI_API_KEY environment variable."
+                detail="LLM service not available. Please set OPENROUTER_API_KEY environment variable."
             )
         else:
             raise HTTPException(
@@ -222,20 +223,24 @@ async def assess_opportunities(session_id: str):
         session.current_step = "assessing_opportunities"
         session_service.update_session_step_status(session_id, "assess_opportunities", "in_progress")
         
-        # Assess each selected opportunity
+        # Assess all selected opportunities concurrently; each LLM call takes several seconds
+        opportunities_by_id = {o.id: o for o in session.opportunities}
+        selected = [opportunities_by_id[opp_id] for opp_id in session.selected_opportunity_ids if opp_id in opportunities_by_id]
+        results = await asyncio.gather(
+            *(lcel_service.assess_opportunity(opp) for opp in selected),
+            return_exceptions=True
+        )
+
         assessments = []
         errors = []
-        
-        for opp_id in session.selected_opportunity_ids:
-            opp = next((o for o in session.opportunities if o.id == opp_id), None)
-            if opp:
-                try:
-                    assessment = await lcel_service.assess_opportunity(opp)
-                    assessments.append(assessment)
-                except Exception as e:
-                    error_msg = f"Failed to assess opportunity {opp_id}: {str(e)}"
-                    logger.error(error_msg)
-                    errors.append(error_msg)
+
+        for opp, result in zip(selected, results):
+            if isinstance(result, BaseException):
+                error_msg = f"Failed to assess opportunity {opp.id}: {str(result)}"
+                logger.error(error_msg)
+                errors.append(error_msg)
+            else:
+                assessments.append(result)
         
         if not assessments:
             raise ValueError("Failed to assess any opportunities")
@@ -259,7 +264,7 @@ async def assess_opportunities(session_id: str):
         if "LLM service not available" in str(e):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="LLM service not available. Please set OPENAI_API_KEY environment variable."
+                detail="LLM service not available. Please set OPENROUTER_API_KEY environment variable."
             )
         else:
             raise HTTPException(
@@ -347,32 +352,35 @@ async def generate_portfolio(session_id: str):
         session.current_step = "generating_portfolio"
         session_service.update_session_step_status(session_id, "generate_portfolio", "in_progress")
         
-        # Generate individual portfolios for GO opportunities
-        individual_portfolios = {}
-        
+        # Collect GO opportunities that have an assessment
+        go_items = []
+
         for decision in session.decisions:
             if decision.decision == "go":
                 opp = next((o for o in session.opportunities if o.id == decision.opportunity_id), None)
                 assessment = next((a for a in session.assessments if a.opportunity_id == decision.opportunity_id), None)
-                
+
                 if opp and assessment:
-                    # Generate individual portfolio for this opportunity
-                    assessment_data = {
-                        'desirability_score': assessment.desirability_score,
-                        'desirability_reasoning': assessment.desirability_reasoning,
-                        'feasibility_score': assessment.feasibility_score,
-                        'feasibility_reasoning': assessment.feasibility_reasoning,
-                        'viability_score': assessment.viability_score,
-                        'viability_reasoning': assessment.viability_reasoning
-                    }
-                    
-                    individual_portfolio = await lcel_service.generate_individual_portfolio(
-                        opp.title, 
-                        opp.description, 
-                        assessment_data
-                    )
-                    
-                    individual_portfolios[opp.id] = individual_portfolio
+                    go_items.append((opp, assessment))
+
+        # Generate the individual portfolios concurrently; each LLM call takes several seconds
+        portfolios = await asyncio.gather(*(
+            lcel_service.generate_individual_portfolio(
+                opp.title,
+                opp.description,
+                {
+                    'desirability_score': assessment.desirability_score,
+                    'desirability_reasoning': assessment.desirability_reasoning,
+                    'feasibility_score': assessment.feasibility_score,
+                    'feasibility_reasoning': assessment.feasibility_reasoning,
+                    'viability_score': assessment.viability_score,
+                    'viability_reasoning': assessment.viability_reasoning
+                }
+            )
+            for opp, assessment in go_items
+        ))
+
+        individual_portfolios = {opp.id: portfolio for (opp, _), portfolio in zip(go_items, portfolios)}
         
         # Create final portfolio structure with individual portfolios
         portfolio_data = {
@@ -397,7 +405,7 @@ async def generate_portfolio(session_id: str):
         if "LLM service not available" in str(e):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="LLM service not available. Please set OPENAI_API_KEY environment variable."
+                detail="LLM service not available. Please set OPENROUTER_API_KEY environment variable."
             )
         else:
             raise HTTPException(

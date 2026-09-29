@@ -24,14 +24,14 @@ The application is designed to be domain-agnostic and can work with any type of 
 - **Frontend**: React with Vite, TypeScript, Tailwind CSS
 - **State Management**: Simple session storage (Python dict or Redis)
 - **Communication**: HTTP REST API with polling for progress
-- **LLM Integration**: OpenAI API via LangChain LCEL chains
+- **LLM Integration**: OpenRouter (default model `deepseek/deepseek-v4.1-flash`) via LangChain LCEL chains
 - **Data Source**: CSV file for initial signals
 
 ## Prerequisites
 
 - Python 3.11+
 - Node.js 18+
-- OpenAI API key
+- OpenRouter API key
 - uv (Python package manager)
 
 ## Setup Instructions
@@ -54,7 +54,11 @@ uv sync --group dev
 Create a `.env` file in the project root:
 
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+# Optional: use a different OpenRouter model
+# OPENROUTER_MODEL=deepseek/deepseek-v4.1-flash
+# Optional: enable reasoning (low, medium or high). Off by default: ~3x slower and ~5x pricier per call.
+# OPENROUTER_REASONING=low
 ```
 
 ### 3. Setup Frontend

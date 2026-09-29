@@ -45,7 +45,7 @@ signal-analysis-frontend/
 Set these in your Render dashboard:
 
 ```
-OPENAI_API_KEY=your_openai_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 ENVIRONMENT=production
 PORT=10000
 CORS_ORIGINS=https://your-frontend-domain.vercel.app
@@ -62,7 +62,7 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: OPENAI_API_KEY
+      - key: OPENROUTER_API_KEY
         sync: false
       - key: ENVIRONMENT
         value: production

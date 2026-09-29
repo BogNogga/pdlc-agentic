@@ -65,7 +65,7 @@ git push -u origin main
 In Render dashboard, add these environment variables:
 
 ```
-OPENAI_API_KEY=your_openai_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 ENVIRONMENT=production
 CORS_ORIGINS=https://your-frontend-domain.vercel.app
 ```

@@ -20,7 +20,7 @@ The system follows a **clean separation of concerns** with three distinct layers
 - **FastAPI**: Modern, fast web framework for building APIs
 - **LangChain LCEL**: Orchestrates AI workflows and chains multiple LLM calls
 - **Pydantic**: Ensures data validation and type safety
-- **OpenAI GPT**: Provides the AI intelligence for analysis
+- **DeepSeek V4.1 Flash via OpenRouter**: Provides the AI intelligence for analysis
 
 **Frontend (React/TypeScript)**
 - **React**: Component-based UI framework
@@ -48,7 +48,7 @@ signals = csv_service.load_signals_from_csv("data/signals.csv")
 
 **Technical Implementation**:
 ```python
-# LangChain LCEL chain processes signals through GPT
+# LangChain LCEL chain processes signals through the LLM
 opportunities = await lcel_service.generate_opportunities(signals)
 ```
 

@@ -34,7 +34,7 @@ Split into separate repos for independent scaling and deployment.
 
 2. **Environment Variables**
    ```
-   OPENAI_API_KEY=your_openai_api_key_here
+   OPENROUTER_API_KEY=your_openrouter_api_key_here
    ENVIRONMENT=production
    CORS_ORIGINS=https://your-frontend.vercel.app
    PORT=10000
@@ -143,7 +143,7 @@ git push origin main
 
 5. Set environment variables:
    ```
-   OPENAI_API_KEY=your_openai_api_key_here
+   OPENROUTER_API_KEY=your_openrouter_api_key_here
    ENVIRONMENT=production
    CORS_ORIGINS=https://your-frontend.vercel.app
    ```

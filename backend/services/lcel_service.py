@@ -15,6 +15,21 @@ from ..models import Signal, Opportunity, Assessment
 
 logger = logging.getLogger(__name__)
 
+# OpenRouter exposes an OpenAI-compatible API, so ChatOpenAI works with a different base URL.
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+DEFAULT_MODEL = "deepseek/deepseek-v4.1-flash"
+# Reasoning is off by default: with it on, a call takes ~3x longer and costs ~5x more,
+# while the prompts only ask for structured JSON. Set OPENROUTER_REASONING to low/medium/high to enable it.
+REASONING_EFFORTS = {"low", "medium", "high"}
+# OpenRouter's default price-first routing sometimes picks an fp4-quantized provider that needs
+# minutes for a single response. Prefer the fastest providers and skip fp4 ones.
+PROVIDER_PREFERENCES = {
+    "sort": "throughput",
+    "quantizations": ["int8", "fp8", "fp16", "bf16", "fp32", "unknown"],
+}
+# Abort a stuck call so the retry loops below can try again.
+REQUEST_TIMEOUT_SECONDS = 60
+
 
 class LCELService:
     """Service for managing LangChain LCEL chains and LLM interactions."""
@@ -26,11 +41,21 @@ class LCELService:
     def get_llm(self) -> Optional[ChatOpenAI]:
         """Get or initialize the LLM instance."""
         if self.llm is None:
-            api_key = os.getenv("OPENAI_API_KEY")
+            api_key = os.getenv("OPENROUTER_API_KEY")
             if not api_key:
-                logger.warning("OPENAI_API_KEY not set. LLM functionality will be limited.")
+                logger.warning("OPENROUTER_API_KEY not set. LLM functionality will be limited.")
                 return None
-            self.llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.7, api_key=api_key)
+            effort = (os.getenv("OPENROUTER_REASONING") or "").strip().lower()
+            reasoning = {"effort": effort} if effort in REASONING_EFFORTS else {"enabled": False}
+            self.llm = ChatOpenAI(
+                model=os.getenv("OPENROUTER_MODEL") or DEFAULT_MODEL,
+                temperature=0.7,
+                api_key=api_key,
+                base_url=OPENROUTER_BASE_URL,
+                timeout=REQUEST_TIMEOUT_SECONDS,
+                max_retries=0,
+                extra_body={"reasoning": reasoning, "provider": PROVIDER_PREFERENCES},
+            )
         return self.llm
     
     def create_lcel_chains(self) -> Tuple[Optional[Any], Optional[Any], Optional[Any]]:

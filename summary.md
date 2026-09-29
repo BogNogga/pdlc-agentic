@@ -7,7 +7,7 @@ Your application is essentially an **AI-powered business consultant** that takes
 ## 🔄 How It Works (The Signal Flow)
 
 1. **Signal Ingestion** → CSV data is loaded and validated
-2. **AI Pattern Recognition** → GPT analyzes signals to identify opportunities  
+2. **AI Pattern Recognition** → The LLM analyzes signals to identify opportunities  
 3. **Human Curation** → Users select the most promising opportunities
 4. **Multi-Dimensional Assessment** → AI evaluates each on Desirability/Feasibility/Viability
 5. **Strategic Decisions** → Users make go/hold/drop decisions

@@ -63,7 +63,7 @@ const BackgroundActivityIndicator: React.FC<BackgroundActivityIndicatorProps> = 
           subtitle: 'AI analyzing signals to identify improvement opportunities',
           activities: [
             'Preparing organizational signals for AI analysis',
-            'Sending signals to OpenAI GPT-3.5-Turbo model',
+            'Sending signals to DeepSeek V4.1 Flash via OpenRouter',
             'AI analyzing operational patterns and themes',
             'Generating 8-12 strategic opportunities',
             'Validating opportunity-signal relationships',
@@ -259,7 +259,7 @@ const BackgroundActivityIndicator: React.FC<BackgroundActivityIndicatorProps> = 
                 <div>Target Opportunities</div>
               </div>
               <div className="text-center">
-                <div className="font-semibold text-green-600">GPT-3.5-Turbo</div>
+                <div className="font-semibold text-green-600">DeepSeek V4.1 Flash</div>
                 <div>AI Model</div>
               </div>
             </>
@@ -306,7 +306,7 @@ const BackgroundActivityIndicator: React.FC<BackgroundActivityIndicatorProps> = 
         <details className="cursor-pointer">
           <summary className="hover:text-gray-700">Technical Details</summary>
           <div className="mt-2 space-y-1 ml-4">
-            <div>• Using OpenAI GPT-3.5-Turbo for organizational analysis</div>
+            <div>• Using DeepSeek V4.1 Flash via OpenRouter for organizational analysis</div>
             <div>• LangChain LCEL for structured workflows</div>
             <div>• Domain-specific JSON schema validation</div>
             <div>• Retry logic with exponential backoff</div>

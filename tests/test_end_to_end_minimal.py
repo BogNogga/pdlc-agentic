@@ -3,6 +3,7 @@ Minimal end-to-end test with real API calls.
 Tests the complete workflow with minimal data to verify integration.
 """
 
+import os
 import pytest
 from fastapi.testclient import TestClient
 from dotenv import load_dotenv
@@ -21,11 +22,12 @@ class TestEndToEndMinimal:
         """Create a test client for FastAPI app."""
         return TestClient(app)
     
+    @pytest.mark.skipif(not os.getenv("OPENROUTER_API_KEY"), reason="OpenRouter API key not available")
     @pytest.mark.asyncio
     async def test_complete_workflow_minimal(self, client):
         """Test the complete workflow with minimal API calls."""
         print("\n🚀 Starting minimal end-to-end workflow test...")
-        print("💰 Using gpt-3.5-turbo to minimize costs")
+        print("💰 Using the OpenRouter model with minimal selections to keep costs low")
         
         # Step 1: Create session
         print("\n📋 Step 1: Creating session...")
