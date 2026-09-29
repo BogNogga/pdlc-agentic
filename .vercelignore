@@ -1,0 +1,12 @@
+# Secrets: set these as Vercel environment variables instead
+.env
+.env.*
+!.env.example
+
+# Local environments and build artifacts
+.venv
+**/node_modules
+**/__pycache__
+.pytest_cache
+frontend/dist
+.playwright-mcp
