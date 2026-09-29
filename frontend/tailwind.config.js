@@ -7,22 +7,27 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+        ink: {
+          DEFAULT: '#17212B',
+          soft: '#4A5664',
+          faint: '#7A8593',
         },
+        paper: '#F4F6F8',
+        line: '#DCE1E7',
+        // The route colour marks progress and the primary action.
+        route: {
+          DEFAULT: '#1F5E8C',
+          dark: '#174A6E',
+          soft: '#E4EEF6',
+        },
+        // Decision colours, used only for go / hold / drop.
+        go: { DEFAULT: '#1E7A46', soft: '#E3F2E9' },
+        hold: { DEFAULT: '#A86A12', soft: '#FBF1DD' },
+        drop: { DEFAULT: '#B42318', soft: '#FBE6E4' },
       },
-      animation: {
-        'spin-slow': 'spin 2s linear infinite',
-      }
+      fontFamily: {
+        sans: ['"IBM Plex Sans"', 'system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'],
+      },
     },
   },
   plugins: [],
